@@ -1,15 +1,12 @@
-const StatusCodes = require('../utils/status-codes');
-
+const { StatusCodes } = require('http-status-codes');
+const {ErrorResponse}= require('../utills/common');
 function validateCreateRequest(req, res, next) {
     if(!req.body.modelNumber){
+        ErrorResponse.success = false;
+        ErrorResponse.message = "Model Number not found in the request";
         return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({
-        success:true,
-        message:"Model Number not found in the request",
-        data:{},    
-        error:{explanation:"Model Number is required"}
-        });
+        .json(ErrorResponse);
     }
     next();
 }

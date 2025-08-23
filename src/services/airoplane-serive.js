@@ -11,6 +11,18 @@ async function createAiroplane(data) {
     }
 }
 
+async function getAiroplane() {
+    try {
+        const airoplane = await airoplaneRepository.getAll();
+        return airoplane;
+    } catch (error) {
+        throw new apierror('Cannot fetch data of airoplane');
+    }
+}
+
+
 module.exports = {
-    createAiroplane
+    createAiroplane,
+    getAiroplane
 };
+
