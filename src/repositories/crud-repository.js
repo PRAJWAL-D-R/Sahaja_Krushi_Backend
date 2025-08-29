@@ -1,5 +1,7 @@
 const { where } = require("sequelize");
 const logger = require("../config/logger-config");
+const Apperror = require("../utills/app-error");
+const statusCodes = require("http-status-codes");
 
 class CrudRepository{
     constructor(model){
@@ -22,6 +24,9 @@ class CrudRepository{
                     id:data
                 }
             });
+            if(!response){
+                throw new Apperror('No data found',statusCodes.NOT_FOUND);
+            }
             return response; 
         }catch(error){
             logger.error('Something went wrong in crud repo : create');
@@ -32,7 +37,11 @@ class CrudRepository{
      async get(data){
         try{
             const response = await this.model.findByPk(data);
-            return response; 
+            if(!response){
+                throw new Apperror('No data found',statusCodes.NOT_FOUND);
+            }
+            return response;
+           
         }catch(error){
             logger.error('Something went wrong in crud repo : create');
             throw error;

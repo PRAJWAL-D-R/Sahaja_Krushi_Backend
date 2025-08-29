@@ -13,5 +13,14 @@ router.post('/',
 router.get('/',
     AiroplaneController.getAiroplanes);
 
+router.get('/:id',
+    AiroplaneController.getAiroplanesById);
+
+router.delete('/:id',
+    AiroplaneController.destroyAiroplane);
+
+router.patch('/:id',
+    AiroplaneMiddleware.validateUpdateRequest,
+    AiroplaneController.updateAiroplane);
 
 module.exports= router;

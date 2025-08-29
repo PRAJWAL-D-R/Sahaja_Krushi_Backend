@@ -40,11 +40,68 @@ async function getAiroplanes(req,res){
         return res
                 .status(error.statusCode)
                 .json(ErrorResponse);
+    }
+}
 
+async function getAiroplanesById(req,res){
+    try{    
+        const airoplane=await AiroplaneService.getAiroplaneID(req.params.id);
+       SuccessResponse.data=airoplane;
+       return res
+                .status(StatusCodes.OK)
+                .json(SuccessResponse);
+    }catch(error){
+        ErrorResponse.error=error;
+        return res
+                .status(error.StatusCodes || StatusCodes.INTERNAL_SERVER_ERROR)
+                .json(ErrorResponse);
+    }
+}
+
+async function destroyAiroplane(req,res){
+    try{    
+        const airoplane=await AiroplaneService.destroyAiroplane(req.params.id);
+       SuccessResponse.data=airoplane;
+       return res
+                .status(StatusCodes.OK)
+                .json(SuccessResponse);
+    }catch(error){
+        ErrorResponse.error=error;
+        return res
+                .status(error.StatusCodes || StatusCodes.INTERNAL_SERVER_ERROR)
+                .json(ErrorResponse);
+    }       
+}
+
+async function updateAiroplane(req,res){
+    try{
+        const airoplane=await AiroplaneService.updateAiroplane(req.params.id,{
+            modelNumber:req.body.modelNumber,
+            capacity:req.body.capacity
+        });
+        return res.status(StatusCodes.OK)
+                    .json({
+                        success:true,
+                        message:"Successfully update an Airoplane",
+                        data:airoplane,
+                        error:{}
+                    })
+    }catch(error){
+        return res 
+                .status(StatusCodes.INTERNAL_SERVER_ERROR)
+                .json({
+                     success:false,
+                        message:"Something went to wrong while updating a airoplane",
+                        data:{},
+                        error:error
+                })
     }
 }
 
 module.exports={
     createAiroplane,
-    getAiroplanes
+    getAiroplanes,
+    getAiroplanesById,
+    destroyAiroplane,
+    updateAiroplane
 }
