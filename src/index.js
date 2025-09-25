@@ -64,6 +64,14 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 const apiRoutes = require('./routes')
 app.use('/api', apiRoutes)
 
+// Health endpoints for root and API base
+app.get('/', (req, res) => {
+  res.status(200).json({ success: true, message: 'Sahaja Krushi API', data: { uptime: process.uptime() } })
+})
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ success: true, message: 'OK', data: { uptime: process.uptime() } })
+})
+
 // 404 for unknown routes
 app.use((req, res, next) => {
   res.status(404).json({ success: false, message: 'Route not found', data: null })
