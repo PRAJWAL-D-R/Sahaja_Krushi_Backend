@@ -1,4 +1,4 @@
 module.exports = {
-    AiroplaneMiddleware : require('./airoplane-middleware'),
-    CityMiddleware:require('./city-middleware')
+   NewsValidate: require('./news-middleware'),
+   UserValidate: require('./user-middleware')
 }

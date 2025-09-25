@@ -1,8 +1,10 @@
-const success ={
+// success-response.js
+const successResponse = (message, data = {}) => {
+  return {
     success: true,
-    message: "Operation was successful",       
-    data: {},
-    error: {}
-}
+    message: message || "Operation completed successfully",
+    data
+  };
+};
 
-module.exports = success 
+module.exports = successResponse;

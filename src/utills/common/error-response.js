@@ -1,8 +1,11 @@
-const error ={
+// error-response.js
+const errorResponse = (message, data = {}, error = {}) => {
+  return {
     success: false,
-    message: "Operation is not successful",       
-    data: {},
-    error: {}
-}
+    message: message || "Operation is not successful",
+    data,
+    error
+  };
+};
 
-module.exports = error;
+module.exports = errorResponse;

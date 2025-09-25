@@ -29,7 +29,7 @@ class CrudRepository{
             }
             return response; 
         }catch(error){
-            logger.error('Something went wrong in crud repo : create');
+            logger.error('Something went wrong in crud repo : destroy');
             throw error;
 
         }
@@ -43,7 +43,7 @@ class CrudRepository{
             return response;
            
         }catch(error){
-            logger.error('Something went wrong in crud repo : create');
+            logger.error('Something went wrong in crud repo : get');
             throw error;
 
         }
@@ -53,21 +53,26 @@ class CrudRepository{
             const response = await this.model.findAll();
             return response; 
         }catch(error){
-            logger.error('Something went wrong in crud repo : create');
+            logger.error('Something went wrong in crud repo : getAll');
             throw error;
 
         }
     }
      async update(id, data){
         try{
-            const response = await this.model.update(data,{
+            const [updatedRows] = await this.model.update(data,{
                 where:{
                     id : id
                 }
             });
-            return response; 
+            if(updatedRows === 0){
+                throw new Apperror('No data found',statusCodes.NOT_FOUND);
+            }
+            // Return the updated record
+            const updatedRecord = await this.model.findByPk(id);
+            return updatedRecord; 
         }catch(error){
-            logger.error('Something went wrong in crud repo : create');
+            logger.error('Something went wrong in crud repo : update');
             throw error;
 
         }

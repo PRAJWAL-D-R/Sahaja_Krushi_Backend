@@ -1,4 +1,3 @@
 module.exports = {
-    AiroplaneService : require ('./airoplane-serive'),
-    CityService:require('./city-service')
+    NewsService:require('./news-service')
 }
