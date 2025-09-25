@@ -20,16 +20,32 @@ const {
   DB_PORT,
   DATABASE_URL,
   FRONTEND_URL,
+  // Clever Cloud addon variables
+  MYSQL_ADDON_HOST,
+  MYSQL_ADDON_DB,
+  MYSQL_ADDON_USER,
+  MYSQL_ADDON_PORT,
+  MYSQL_ADDON_PASSWORD,
+  MYSQL_ADDON_URI,
 } = process.env
 
-if (DATABASE_URL) {
-  process.env.DATABASE_URL = DATABASE_URL
+// Prefer single connection string if provided
+if (DATABASE_URL || MYSQL_ADDON_URI) {
+  process.env.DATABASE_URL = DATABASE_URL || MYSQL_ADDON_URI
 } else if (DB_HOST || DB_USER || DB_NAME) {
+  // Map custom DB_* to Sequelize's expected MYSQL_* envs used in this codebase
   process.env.MYSQL_HOST = DB_HOST
   process.env.MYSQL_USER = DB_USER
   process.env.MYSQL_PWD = DB_PASS || ''
   process.env.MYSQL_DB = DB_NAME
   process.env.MYSQL_PORT = DB_PORT || '3306'
+} else if (MYSQL_ADDON_HOST || MYSQL_ADDON_USER || MYSQL_ADDON_DB) {
+  // Map Clever Cloud addon variables
+  process.env.MYSQL_HOST = MYSQL_ADDON_HOST
+  process.env.MYSQL_USER = MYSQL_ADDON_USER
+  process.env.MYSQL_PWD = MYSQL_ADDON_PASSWORD || ''
+  process.env.MYSQL_DB = MYSQL_ADDON_DB
+  process.env.MYSQL_PORT = MYSQL_ADDON_PORT || '3306'
 }
 
 const app = express()
@@ -84,18 +100,23 @@ app.use(errorHandler)
 // Bootstrap database via models (uses MYSQL_* or DATABASE_URL envs)
 const db = require('./models')
 
+// One-time initialization guard for serverless/Vercel environments
+let initialized = false
+async function ensureInitialized() {
+  if (initialized) return
+  // Verify DB connection
+  await db.sequelize.authenticate()
+  console.log('[DB] Connection established successfully.')
+  await db.sequelize.sync({ force: false, alter: false })
+  console.log('[DB] Models synchronized (non-destructive). For production, prefer migrations.')
+  initialized = true
+}
+
 async function startServer() {
   const port = Number(process.env.PORT) || 3000
 
   try {
-    // Verify DB connection
-    await db.sequelize.authenticate()
-    console.log('[DB] Connection established successfully.')
-
-    // Safe sync for production: avoid destructive operations
-    // Prefer running migrations in production environments
-    await db.sequelize.sync({ force: false, alter: false })
-    console.log('[DB] Models synchronized (non-destructive). For production, prefer migrations.')
+    await ensureInitialized()
 
     app.listen(port, () => {
       console.log(`[Server] Listening on port ${port} (NODE_ENV=${process.env.NODE_ENV || 'development'})`)
@@ -111,4 +132,18 @@ async function startServer() {
   }
 }
 
-startServer()
+// In serverless environments (e.g., Vercel), export the app instead of listening.
+if (process.env.VERCEL) {
+  // Initialize lazily on first request to reduce cold start
+  app.use(async (req, res, next) => {
+    try {
+      await ensureInitialized()
+      next()
+    } catch (e) {
+      next(e)
+    }
+  })
+  module.exports = app
+} else {
+  startServer()
+}
