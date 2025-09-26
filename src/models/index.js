@@ -35,11 +35,16 @@ const {
   MYSQL_DB,
   MYSQL_PWD,
   DATABASE_URL,
+  MYSQL_ADDON_URI,
 } = process.env;
 
-if (DATABASE_URL) {
-  // Support single connection string if present
-  sequelize = new Sequelize(DATABASE_URL, {
+const hasUrl = typeof DATABASE_URL === 'string' && /^mysql:\/\//i.test(DATABASE_URL);
+const hasAddonUrl = typeof MYSQL_ADDON_URI === 'string' && /^mysql:\/\//i.test(MYSQL_ADDON_URI);
+
+if (hasUrl || hasAddonUrl) {
+  // Support single connection string if present and valid
+  const connectionUrl = hasUrl ? DATABASE_URL : MYSQL_ADDON_URI;
+  sequelize = new Sequelize(connectionUrl, {
     dialect: 'mysql',
     logging: false,
   });

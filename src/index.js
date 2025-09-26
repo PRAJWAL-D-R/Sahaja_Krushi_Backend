@@ -137,6 +137,11 @@ if (process.env.VERCEL) {
   // Initialize lazily on first request to reduce cold start
   app.use(async (req, res, next) => {
     try {
+      // Allow health checks without DB
+      const url = req.originalUrl || req.url || ''
+      if (url.startsWith('/api/health') || url === '/health' || url === '/') {
+        return next()
+      }
       await ensureInitialized()
       next()
     } catch (e) {
